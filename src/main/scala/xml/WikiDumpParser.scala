@@ -23,5 +23,5 @@ object WikiDumpParser extends App {
     throw new Exception(msg)
   }
 
-  new PageParser().parseInfoBoxToCsv(inputXmlFile)
+  new PageParser().parseInfoBoxToCsv(inputXmlFile, Set("person", "settlement"))
 }

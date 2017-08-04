@@ -28,5 +28,5 @@ case class WrappedPage(var page: WikiArticle = new WikiArticle) {}
   * @param text       Text of the current page including markup
   * @param isFile     Is the page a file page, not perfectly accurate
   */
-case class Page(title: String, text: String, isFile: Boolean, infoBox: Option[String])
+case class Page(pageId: String, title: String, text: String, isFile: Boolean, infoBox: String)
 
