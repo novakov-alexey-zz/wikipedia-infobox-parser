@@ -17,7 +17,7 @@ class PageParser(outputLocation: File = new File("output")) {
     parseXml(inputXmlFileName, page => {
       infoboxFilter.foreach { infobox =>
         if (page.infoBox.startsWith("{{Infobox " + infobox)) {
-          writePage(infobox, page.pageId, ArrayBuffer(page.infoBox))
+          writePage(infobox, page.pageId, page.infoBox)
         }
       }
     })
@@ -90,8 +90,7 @@ class PageParser(outputLocation: File = new File("output")) {
   }
 
 
-  private def writePage(infoboxName: String, pageId: String, buf: ArrayBuffer[String]) = {
-    val s = buf.mkString
+  private def writePage(infoboxName: String, pageId: String, text: String) = {
     val path = Paths.get(outputLocation.toString, infoboxName)
     Files.createDirectories(path)
     val fullPath = path.resolve(pageId + ".txt").toAbsolutePath.toFile
@@ -100,7 +99,7 @@ class PageParser(outputLocation: File = new File("output")) {
     val out = new FileOutputStream(fullPath)
 
     try {
-      out.write(s.getBytes())
+      out.write(text.getBytes())
     } catch {
       case NonFatal(throwable) => sys.error(s"error '${throwable.getMessage}' while saving page $fullPath")
     } finally out.close()
