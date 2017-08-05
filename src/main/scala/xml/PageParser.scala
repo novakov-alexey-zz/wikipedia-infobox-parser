@@ -15,8 +15,10 @@ class PageParser(outputLocation: File = new File("output")) {
 
   def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String]) = {
     parseXml(inputXmlFileName, page => {
+      println(s"processing pageId: ${page.pageId} ")
       infoboxFilter.foreach { infobox =>
         if (page.infoBox.startsWith("{{Infobox " + infobox)) {
+          println(s"found $infobox, going to write ${page.pageId}")
           writePage(infobox, page.pageId, page.infoBox)
         }
       }
