@@ -18,12 +18,15 @@ object PageParser {
 class PageParser(outputLocation: File) {
 
   def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String], lastSeenPageId: Option[String] = None): Unit = {
+    def nonEmptyInfobox(page: PageInfobox, infobox: String) = page.infoBox.trim != s"{{Infobox $infobox}}"
+
     parseXml(inputXmlFileName, page => {
       println(s"processing pageId: ${page.pageId} ")
 
-      if (lastSeenPageId.exists(_.compare(page.pageId.trim) < 0)) {
+      if (lastSeenPageId.isEmpty || lastSeenPageId.exists(_.compare(page.pageId.trim) < 0)) {
         infoboxFilter.foreach { infobox =>
-          if (page.infoBox.startsWith("{{Infobox " + infobox)) {
+
+          if (page.infoBox.startsWith(s"{{Infobox $infobox") && nonEmptyInfobox(page, infobox)) {
 
             println(s"found $infobox, going to write ${page.pageId}")
             writePage(infobox, page.pageId, page.infoBox)
@@ -71,30 +74,30 @@ class PageParser(outputLocation: File) {
   private def parsePageInfobox(text: String): Option[PageInfobox] = {
     val infoBox = Option(new WikiPatternMatcher(text).getInfoBox).map(_.dumpRaw())
 
-    if (infoBox.isEmpty)
-      return None
+    if (infoBox.isEmpty) None
+    else {
+      val wrappedPage = new WrappedPage
+      //The parser occasionally throws exceptions out, we ignore these
+      try {
+        val parser = new WikiXMLParser(new ByteArrayInputStream(text.getBytes), new SetterArticleFilter(wrappedPage))
+        parser.parse()
+      } catch {
+        case e: Exception =>
+      }
 
-    val wrappedPage = new WrappedPage
-    //The parser occasionally throws exceptions out, we ignore these
-    try {
-      val parser = new WikiXMLParser(new ByteArrayInputStream(text.getBytes), new SetterArticleFilter(wrappedPage))
-      parser.parse()
-    } catch {
-      case e: Exception =>
-    }
+      val page = wrappedPage.page
+      lazy val pageId = {
+        val textElem = XML.loadString(text)
+        (textElem \ "id").head.child.head.toString
+      }
 
-    val page = wrappedPage.page
-    lazy val pageId = {
-      val textElem = XML.loadString(text)
-      (textElem \ "id").head.child.head.toString
-    }
-
-    if (page.getText != null && page.getTitle != null && page.getId != null
-      && page.getRevisionId != null && page.getTimeStamp != null
-      && !page.isCategory && !page.isTemplate && infoBox.isDefined) {
-      Some(PageInfobox(pageId, page.getTitle, infoBox.get))
-    } else {
-      None
+      if (page.getText != null && page.getTitle != null && page.getId != null
+        && page.getRevisionId != null && page.getTimeStamp != null
+        && !page.isCategory && !page.isTemplate && infoBox.isDefined) {
+        Some(PageInfobox(pageId, page.getTitle, infoBox.get))
+      } else {
+        None
+      }
     }
   }
 
