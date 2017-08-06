@@ -11,17 +11,23 @@ import scala.util.control.NonFatal
 import scala.xml.XML
 import scala.xml.pull.{EvElemEnd, EvElemStart, EvText, XMLEventReader}
 
-class PageParser(outputLocation: File = new File("output")) {
+object PageParser {
+  def apply(outputLocation: File = new File("output")) = new PageParser(outputLocation)
+}
 
-  def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String]) = {
+class PageParser(outputLocation: File) {
+
+  def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String], lastSeenPageId: Option[String] = None): Unit = {
     parseXml(inputXmlFileName, page => {
       println(s"processing pageId: ${page.pageId} ")
 
-      infoboxFilter.foreach { infobox =>
-        if (page.infoBox.startsWith("{{Infobox " + infobox)) {
+      if (lastSeenPageId.exists(_.compare(page.pageId.trim) < 0)) {
+        infoboxFilter.foreach { infobox =>
+          if (page.infoBox.startsWith("{{Infobox " + infobox)) {
 
-          println(s"found $infobox, going to write ${page.pageId}")
-          writePage(infobox, page.pageId, page.infoBox)
+            println(s"found $infobox, going to write ${page.pageId}")
+            writePage(infobox, page.pageId, page.infoBox)
+          }
         }
       }
     })
