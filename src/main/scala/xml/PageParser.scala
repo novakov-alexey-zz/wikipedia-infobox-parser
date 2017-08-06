@@ -16,8 +16,10 @@ class PageParser(outputLocation: File = new File("output")) {
   def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String]) = {
     parseXml(inputXmlFileName, page => {
       println(s"processing pageId: ${page.pageId} ")
+
       infoboxFilter.foreach { infobox =>
         if (page.infoBox.startsWith("{{Infobox " + infobox)) {
+
           println(s"found $infobox, going to write ${page.pageId}")
           writePage(infobox, page.pageId, page.infoBox)
         }
@@ -25,7 +27,7 @@ class PageParser(outputLocation: File = new File("output")) {
     })
   }
 
-  private def parseXml(inputXmlFileName: String, callback: Page => Unit) = {
+  private def parseXml(inputXmlFileName: String, callback: PageInfobox => Unit) = {
     val xml = new XMLEventReader(Source.fromFile(inputXmlFileName))
 
     var insidePage = false
@@ -60,8 +62,7 @@ class PageParser(outputLocation: File = new File("output")) {
     }
   }
 
-
-  private def parsePageInfobox(text: String): Option[Page] = {
+  private def parsePageInfobox(text: String): Option[PageInfobox] = {
     val infoBox = Option(new WikiPatternMatcher(text).getInfoBox).map(_.dumpRaw())
 
     if (infoBox.isEmpty)
@@ -85,12 +86,11 @@ class PageParser(outputLocation: File = new File("output")) {
     if (page.getText != null && page.getTitle != null && page.getId != null
       && page.getRevisionId != null && page.getTimeStamp != null
       && !page.isCategory && !page.isTemplate && infoBox.isDefined) {
-      Some(Page(pageId, page.getTitle, page.getText, page.isFile, infoBox.get))
+      Some(PageInfobox(pageId, page.getTitle, infoBox.get))
     } else {
       None
     }
   }
-
 
   private def writePage(infoboxName: String, pageId: String, text: String) = {
     val path = Paths.get(outputLocation.toString, infoboxName)
