@@ -8,8 +8,10 @@ import scala.io.Source
 trait Infoboxes {
   def getKeys(fileName: String): Seq[String] = {
     Source.fromFile(Paths.get("config", fileName).toFile).getLines()
-      .filter(!_.startsWith("<!--"))
-      .map(_.split("=").headOption).flatten.to[Seq]
+      .filter(!_.startsWith("<!--")) // skip comments
+      .map(_.split("=").headOption.map(_.trim)) // take only keys
+      .flatten
+      .to[Seq]
   }
 
   val keys: Seq[String]
