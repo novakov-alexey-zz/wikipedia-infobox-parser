@@ -1,15 +1,20 @@
-package xml
+package xml.infobox
 
 import java.nio.file.Paths
 
 import scala.collection.mutable
 import scala.io.Source
 
+object Infoboxes {
+  val pathKey = "path"
+}
+
 trait Infoboxes {
   def getKeys(fileName: String): Seq[String] = {
+    Infoboxes.pathKey +:
     Source.fromFile(Paths.get("config", fileName).toFile).getLines()
-      .filter(!_.startsWith("<!--")) // skip comments
-      .map(_.split("=").headOption.map(_.trim)) // take only keys
+      .filterNot(l => l.startsWith("<!--") || l.startsWith("{{") || l.startsWith("}}")) //skip comments, header, footer
+      .map(_.split("=").headOption.map(_.trim.dropWhile(c => c == ' ' || c == '|'))) // take only keys
       .flatten
       .to[Seq]
   }

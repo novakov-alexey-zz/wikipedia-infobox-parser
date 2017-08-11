@@ -1,6 +1,7 @@
 package xml
 
 import org.scalatest.{FlatSpec, Matchers}
+import xml.infobox.{InfoboxPropertiesParser, Settlement}
 
 import scala.io.Source
 
@@ -8,9 +9,12 @@ class SettlementPareserTest extends FlatSpec with Matchers {
 
   it should "parse 'settlement' infobox into map" in {
     //given
-    val infobox = Source.fromResource("detroit_settlement.txt").mkString
+    val infobox = Source.fromInputStream(getClass.getClassLoader.getResourceAsStream("detroit_settlement.txt")).mkString
     //when
     val properties = InfoboxPropertiesParser.parse(infobox)
+    println(Settlement.keys)
+    println()
+    println(properties.mkString("\n"))
     //then
     properties should contain allOf(
       "name" -> "Detroit",
