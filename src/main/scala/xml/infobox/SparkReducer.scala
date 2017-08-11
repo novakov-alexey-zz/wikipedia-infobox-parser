@@ -31,8 +31,8 @@ object SparkReducer extends App {
       .map { case (path, content) => path -> InfoboxPropertiesParser.parse(content) }
       .map { case (path, parsedProps) =>
         if (parsedProps.size > 1) {
-          Some((infoboxProps ++ parsedProps + (Infoboxes.pathKey -> path.split("/").last))
-            .values.mkString("\t"))
+          val pageId = path.split("/").last.split("\\.").head
+          Some((infoboxProps ++ parsedProps + (Infoboxes.pathKey -> pageId)).values.mkString("\t"))
         } else None
       }.collect()
 
