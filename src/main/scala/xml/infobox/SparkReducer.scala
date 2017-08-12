@@ -21,10 +21,9 @@ object SparkReducer extends App {
   val sc = new SparkContext(conf)
 
   val files = FileSystem.get(sc.hadoopConfiguration).listStatus(new Path(inputLocation.toString))
-
   Files.createDirectories(outputLocation.toPath)
 
-  val infoboxProps = if (args.isDefinedAt(2) && args(2) == "2") Person.properties else Settlement.properties
+  val infoboxProps = if (args.isDefinedAt(2) && args(2) == "person") Person.properties else Settlement.properties
 
   files.grouped(8).toSeq.par.foreach(group => group.foreach { f =>
     val tsv = sc.wholeTextFiles(f.getPath.toString)
@@ -32,7 +31,9 @@ object SparkReducer extends App {
       .map { case (path, parsedProps) =>
         if (parsedProps.size > 1) {
           val pageId = path.split("/").last.split("\\.").head
-          Some((infoboxProps ++ parsedProps + (Infoboxes.pathKey -> pageId)).values.mkString("\t"))
+          val values = (infoboxProps ++ parsedProps + (Infoboxes.pathKey -> pageId)).values
+          val csvRow = values.map(v => if (v.contains(",")) s""""$v"""" else v).mkString(",")
+          Some(csvRow)
         } else None
       }.collect()
 
@@ -42,6 +43,7 @@ object SparkReducer extends App {
       writer.close()
     }
   })
+
   sc.stop()
 }
 
