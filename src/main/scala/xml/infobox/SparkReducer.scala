@@ -23,8 +23,9 @@ object SparkReducer extends App {
   Files.createDirectories(outputLocation.toPath)
 
   val infoboxProps = if (args.isDefinedAt(2) && args(2) == "person") Person.properties else Settlement.properties
+  val sizeOfParallelChunk = 8
 
-  files.grouped(8).toSeq.par.foreach(group => group.foreach { f =>
+  files.grouped(sizeOfParallelChunk).toSeq.par.foreach(chunk => chunk.foreach { f =>
     val csv = sc.wholeTextFiles(f.getPath.toString)
       .map { case (path, content) => path -> InfoboxPropertiesParser.parse(content) }
       .map { case (path, parsedProps) =>
