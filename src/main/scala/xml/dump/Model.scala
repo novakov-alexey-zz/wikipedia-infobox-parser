@@ -1,4 +1,4 @@
-package xml
+package xml.dump
 
 import info.bliki.wiki.dump.{IArticleFilter, Siteinfo, WikiArticle}
 import org.xml.sax.SAXException

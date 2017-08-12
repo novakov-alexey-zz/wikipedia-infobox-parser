@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, File, FileOutputStream}
 import java.nio.file.{Files, Paths}
 
 import info.bliki.wiki.dump.{WikiPatternMatcher, WikiXMLParser}
-import xml.{PageInfobox, SetterArticleFilter, WrappedPage}
+import xml.PageInfobox
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source

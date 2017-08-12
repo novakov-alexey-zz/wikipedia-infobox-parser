@@ -10,6 +10,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 object SparkReducer extends App {
   val inputLocation = new File(args(0))
   val outputLocation = new File(args(1))
+  val infoboxProps = if (args.isDefinedAt(2) && args(2) == "person") Person.properties else Settlement.properties
 
   if (!inputLocation.isDirectory) {
     val msg = "Input must be a directory: " + inputLocation.getAbsolutePath
@@ -22,7 +23,6 @@ object SparkReducer extends App {
   val files = FileSystem.get(sc.hadoopConfiguration).listStatus(new Path(inputLocation.toString))
   Files.createDirectories(outputLocation.toPath)
 
-  val infoboxProps = if (args.isDefinedAt(2) && args(2) == "person") Person.properties else Settlement.properties
   val sizeOfParallelChunk = 8
 
   files.grouped(sizeOfParallelChunk).toSeq.par.foreach(chunk => chunk.foreach { f =>
