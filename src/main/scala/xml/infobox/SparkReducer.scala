@@ -8,7 +8,6 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 object SparkReducer extends App {
-
   val inputLocation = new File(args(0))
   val outputLocation = new File(args(1))
 
@@ -26,7 +25,7 @@ object SparkReducer extends App {
   val infoboxProps = if (args.isDefinedAt(2) && args(2) == "person") Person.properties else Settlement.properties
 
   files.grouped(8).toSeq.par.foreach(group => group.foreach { f =>
-    val tsv = sc.wholeTextFiles(f.getPath.toString)
+    val csv = sc.wholeTextFiles(f.getPath.toString)
       .map { case (path, content) => path -> InfoboxPropertiesParser.parse(content) }
       .map { case (path, parsedProps) =>
         if (parsedProps.size > 1) {
@@ -37,7 +36,9 @@ object SparkReducer extends App {
         } else None
       }.collect()
 
-    tsv.head.foreach { content =>
+    require(csv.length == 1, s"File ${f.getPath.toString} should have exactly one Infobox, but was ${csv.length}")
+
+    csv.head.foreach { content =>
       val writer = new FileWriter(s"$outputLocation/${f.getPath.getName}")
       writer.write(content)
       writer.close()
