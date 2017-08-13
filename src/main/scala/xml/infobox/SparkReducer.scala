@@ -31,7 +31,7 @@ object SparkReducer extends App {
       .map { case (path, parsedProps) =>
         if (parsedProps.size > 1) {
           val pageId = path.split("/").last.split("\\.").head
-          val values = (infoboxProps ++ parsedProps + (Infoboxes.pathKey -> pageId)).values
+          val values = (infoboxProps ++ parsedProps.filterKeys(k => infoboxProps.contains(k)) + (Infoboxes.pathKey -> pageId)).values
           val csvRow = values.map(v => if (v.contains(",")) s""""$v"""" else v).mkString(",")
           Some(csvRow)
         } else None
