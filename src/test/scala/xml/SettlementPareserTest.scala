@@ -12,9 +12,6 @@ class SettlementPareserTest extends FlatSpec with Matchers {
     val infobox = Source.fromInputStream(getClass.getClassLoader.getResourceAsStream("detroit_settlement.txt")).mkString
     //when
     val properties = InfoboxPropertiesParser.parse(infobox)
-    println(Settlement.keys)
-    println()
-    println(properties.mkString("\n"))
     //then
     properties should contain allOf(
       "name" -> "Detroit",

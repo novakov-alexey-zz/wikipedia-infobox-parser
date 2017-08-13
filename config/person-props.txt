@@ -1,30 +1,15 @@
 {{Infobox person
-| honorific_prefix   =
 | name               =  <!-- include middle initial, if not specified in birth_name -->
-| honorific_suffix   =
-| image              =  <!-- filename only, no "File:" or "Image:" prefix, and no enclosing [[brackets]] -->
-| image_upright =
-| image_size = <!-- DISCOURAGED per WP:IMGSIZE. Use image_upright. -->
-| alt                =
-| caption            =
-| native_name        =
 | native_name_lang   =
 | pronunciation      =
 | birth_name         =  <!-- only use if different from name above -->
 | birth_date         =  <!-- {{birth date and age|YYYY|MM|DD}} for living people supply only the year with {{Birth year and age|YYYY}} unless the exact date is already widely published, as per [[WP:DOB]]. For people who have died, use {{Birth date|YYYY|MM|DD}}. -->
 | birth_place        =
 | baptised           =  <!-- will not display if birth_date is entered -->
-| disappeared_date   =  <!-- {{disappeared date and age|YYYY|MM|DD|YYYY|MM|DD}} (disappeared date then birth date) -->
-| disappeared_place  =
-| disappeared_status =
 | death_date         =  <!-- {{Death date and age|YYYY|MM|DD|YYYY|MM|DD}} (death date then birth date) -->
 | death_place        =
 | death_cause        =
-| body_discovered    =
 | resting_place      =
-| resting_place_coordinates =  <!-- {{coord|LAT|LONG|type:landmark|display=inline}} -->
-| burial_place       =  <!-- may be used instead of resting_place and resting_place_coordinates (displays "Burial place" as label) -->
-| burial_coordinates =  <!-- {{coord|LAT|LONG|type:landmark|display=inline}} -->
 | monuments          =
 | residence          =
 | nationality        =
@@ -66,17 +51,6 @@
 | father             =  <!-- may be used (optionally with mother parameter) in place of parents parameter (displays "Parent(s)" as label) -->
 | relatives          =
 | family             =
-| callsign           =
 | awards             =
 | website            =  <!-- {{URL|example.com}} -->
-| module             =
-| module2            =
-| module3            =
-| module4            =
-| module5            =
-| module6            =
-| signature          =
-| signature_size     =
-| signature_alt      =
-| footnotes          =
 }}
