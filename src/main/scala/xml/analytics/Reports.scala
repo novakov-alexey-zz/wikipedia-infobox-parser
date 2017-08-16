@@ -18,8 +18,8 @@ object Reports extends App {
   val nationality = personDf.col("nationality")
   val nationalityProjection = when(
     nationality
-      .isin("American", "United States", "U.S.", "[[United States|American]]", "[[Americans|American]]", "[[United States]]", "USA", "{{USA}}"),
-    "American")
+      .isin("American", "United States", "U.S.", "[[United States|American]]", "[[Americans|American]]",
+        "[[United States]]", "USA", "{{USA}}"), "American")
     .otherwise(nationality)
     .as("nationality_new")
 
