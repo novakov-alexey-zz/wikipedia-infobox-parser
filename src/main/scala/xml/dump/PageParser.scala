@@ -17,8 +17,11 @@ object PageParser {
 
 class PageParser(outputLocation: File) {
 
-  def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String], lastSeenPageId: Option[String] = None): Unit = {
+  def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String], outDirPrefix: String,
+                        lastSeenPageId: Option[String] = None): Unit = {
     def nonEmptyInfobox(page: PageInfobox, infobox: String) = page.infoBox.trim != s"{{Infobox $infobox}}"
+
+    val infoBoxToDirName = infoboxFilter.map(n => n -> (outDirPrefix + "-" + n)).toMap
 
     parseXml(inputXmlFileName, page => {
       println(s"processing pageId: ${page.pageId} ")
@@ -27,9 +30,8 @@ class PageParser(outputLocation: File) {
         infoboxFilter.foreach { infobox =>
 
           if (page.infoBox.startsWith(s"{{Infobox $infobox") && nonEmptyInfobox(page, infobox)) {
-
-            println(s"found $infobox, going to write ${page.pageId}")
-            writePage(infobox, page.pageId, page.infoBox)
+            println(s"found $infobox, going to save a page with id: ${page.pageId}")
+            writePage(infoBoxToDirName(infobox), page.pageId, page.infoBox)
           }
         }
       }
