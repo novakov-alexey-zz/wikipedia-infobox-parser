@@ -12,13 +12,12 @@ import scala.xml.XML
 import scala.xml.pull.{EvElemEnd, EvElemStart, EvText, XMLEventReader}
 
 object PageParser {
-  def apply(outputLocation: File = new File("output")) = new PageParser(outputLocation)
+  def apply(outputLocation: File, outDirPrefix: String) = new PageParser(outputLocation, outDirPrefix)
 }
 
-class PageParser(outputLocation: File) {
+class PageParser(outputLocation: File, outDirPrefix: String) {
 
-  def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String], outDirPrefix: String,
-                        lastSeenPageId: Option[String] = None): Unit = {
+  def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String], lastSeenPageId: Option[String] = None): Unit = {
     def nonEmptyInfobox(page: PageInfobox, infobox: String) = page.infoBox.trim != s"{{Infobox $infobox}}"
 
     val infoBoxToDirName = infoboxFilter.map(n => n -> (outDirPrefix + "-" + n)).toMap

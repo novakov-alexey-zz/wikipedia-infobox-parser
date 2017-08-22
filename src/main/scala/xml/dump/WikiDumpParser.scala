@@ -27,7 +27,6 @@ object WikiDumpParser extends App {
 
 
   createDir(outputLocation)
-  infoboxNames.map(new File(_)).foreach(createDir)
 
   if (!outputLocation.isDirectory) {
     val msg = "Output must be a directory: " + outputLocation.getAbsolutePath
@@ -38,8 +37,8 @@ object WikiDumpParser extends App {
     Source.fromFile("lastSeenPageId.txt").getLines().toList.headOption.map(_.trim).filter(s => Try(s.toLong).isSuccess)
   } else None
 
-  lastSeenPageId.foreach(l => println(s"Going to use lastSeenPageId: $l"))
-  PageParser().parseInfoBoxToCsv(inputXmlFile, infoboxNames.toSet, outDirPrefix, lastSeenPageId)
+  lastSeenPageId.foreach(l => println(s"Current lastSeenPageId: $l"))
+  PageParser(outputLocation, outDirPrefix).parseInfoBoxToCsv(inputXmlFile, infoboxNames.toSet, lastSeenPageId)
 
   private def createDir(dir: File) = {
     if (!dir.exists()) {
