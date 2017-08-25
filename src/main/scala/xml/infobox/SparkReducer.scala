@@ -15,6 +15,7 @@ object SparkReducer extends App {
     "writer" -> Writer.properties
   )
 
+  // Parse input parameters
   val inputLocation = new File(args(0))
   val outputLocation = new File(args(1))
 
@@ -31,6 +32,7 @@ object SparkReducer extends App {
     throw new Exception(msg)
   }
 
+  // Start Spark
   val conf = new SparkConf().setAppName("WikiInfoboxReducer").setMaster("local[*]")
   val sc = new SparkContext(conf)
 
@@ -39,6 +41,7 @@ object SparkReducer extends App {
 
   val sizeOfParallelChunk = 8
 
+  // Process files
   files.grouped(sizeOfParallelChunk).toSeq.par.foreach(chunk => chunk.foreach { f =>
     val csv = sc.wholeTextFiles(f.getPath.toString)
       .map { case (path, content) => path -> InfoboxPropertiesParser.parse(content) }
