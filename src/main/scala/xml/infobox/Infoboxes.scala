@@ -14,7 +14,7 @@ trait Infoboxes {
     Infoboxes.pathKey +:
     Source.fromFile(Paths.get("config", fileName).toFile).getLines()
       .filterNot(l => l.startsWith("<!--") || l.startsWith("{{") || l.startsWith("}}")) //skip comments, header, footer
-      .map(_.split("=").headOption.map(_.trim.dropWhile(c => c == ' ' || c == '|'))) // take only keys
+      .map(_.split("=").headOption.map(_.trim.dropWhile(c => c == ' ' || c == '|').toLowerCase)) // take only keys in lower case
       .flatten
       .to[Seq]
   }
@@ -30,4 +30,12 @@ object Settlement extends Infoboxes {
 
 object Person extends Infoboxes {
   override val keys: Seq[String] = getKeys("person-props.txt")
+}
+
+object Ort extends Infoboxes {
+  override val keys: Seq[String] = getKeys("ort-props.txt")
+}
+
+object Writer extends Infoboxes {
+  override val keys: Seq[String] = getKeys("writer-props.txt")
 }

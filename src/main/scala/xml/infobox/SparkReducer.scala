@@ -8,9 +8,23 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 object SparkReducer extends App {
+  val infoboxPropsMap = Map(
+    "person" -> Person.properties,
+    "settlement" -> Settlement.properties,
+    "ort" -> Ort.properties,
+    "writer" -> Writer.properties
+  )
+
   val inputLocation = new File(args(0))
   val outputLocation = new File(args(1))
-  val infoboxProps = if (args.isDefinedAt(2) && args(2) == "person") Person.properties else Settlement.properties
+
+  val infoboxProps =
+    if (args.isDefinedAt(2) && infoboxPropsMap.isDefinedAt(args(2)))
+      infoboxPropsMap(args(2))
+    else
+      throw new Exception(s"Invalid infobox name: ${args(2)}, available: ${infoboxPropsMap.keys}")
+
+  val inputDirPrefix = if (args.isDefinedAt(3)) Some(args(3).trim) else None
 
   if (!inputLocation.isDirectory) {
     val msg = "Input must be a directory: " + inputLocation.getAbsolutePath
