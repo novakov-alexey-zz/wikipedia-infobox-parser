@@ -2,11 +2,11 @@ package xml.infobox
 
 import java.nio.file.Paths
 
-import xml.infobox.Infoboxes._
+import xml.infobox.InfoBoxes._
 
 import scala.io.Source
 
-object Infoboxes {
+object InfoBoxes {
   val pathKey = "path"
 
   //skip comments, header, footer
@@ -18,9 +18,9 @@ object Infoboxes {
   }
 }
 
-trait Infoboxes {
+trait InfoBoxes {
   def getKeys(fileName: String): Seq[String] = {
-    Infoboxes.pathKey +:
+    InfoBoxes.pathKey +:
     Source.fromFile(Paths.get("config", fileName).toFile).getLines()
       .filterNot(skipNoise)
       .map(extractPropertyKey)
@@ -33,18 +33,18 @@ trait Infoboxes {
   def properties: Map[String, String] = keys.map(e => e -> "").toMap
 }
 
-object Settlement extends Infoboxes {
+object Settlement extends InfoBoxes {
   override val keys: Seq[String] = getKeys("settlement-props.txt")
 }
 
-object Person extends Infoboxes {
+object Person extends InfoBoxes {
   override val keys: Seq[String] = getKeys("person-props.txt")
 }
 
-object Ort extends Infoboxes {
+object Ort extends InfoBoxes {
   override val keys: Seq[String] = getKeys("ort-props.txt")
 }
 
-object Writer extends Infoboxes {
+object Writer extends InfoBoxes {
   override val keys: Seq[String] = getKeys("writer-props.txt")
 }

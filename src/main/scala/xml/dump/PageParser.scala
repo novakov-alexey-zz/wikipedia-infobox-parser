@@ -4,6 +4,7 @@ import java.io.{ByteArrayInputStream, File, FileOutputStream}
 import java.nio.file.{Files, Paths}
 
 import info.bliki.wiki.dump.{WikiPatternMatcher, WikiXMLParser}
+import xml.dump.PageParser.infoBoxPrefix
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
@@ -12,32 +13,36 @@ import scala.xml.XML
 import scala.xml.pull.{EvElemEnd, EvElemStart, EvText, XMLEventReader}
 
 object PageParser {
+  val infoBoxPrefix = "{{Infobox"
+
   def apply(outputLocation: File, outDirPrefix: String) = new PageParser(outputLocation, outDirPrefix)
 }
 
 class PageParser(outputLocation: File, outDirPrefix: String) {
 
-  def parseInfoBoxToCsv(inputXmlFileName: String, infoboxFilter: Set[String], lastSeenPageId: Option[String] = None): Unit = {
-    def nonEmptyInfobox(page: PageInfobox, infobox: String) = page.infoBox.trim != s"{{Infobox $infobox}}"
+  def parseInfoBoxToCsv(inputXmlFileName: String, infoBoxFilter: Set[String], lastSeenPageId: Option[String] = None): Unit = {
 
-    val infoBoxToDirName = infoboxFilter.map(n => n -> (outDirPrefix + "-" + n)).toMap
+    def nonEmptyInfoBox(page: PageInfoBox, infoBox: String) =
+      page.infoBox.trim != s"$infoBoxPrefix $infoBox}}"
+
+    val infoBoxToDirName = infoBoxFilter.map(n => n -> (outDirPrefix + "-" + n)).toMap
 
     parseXml(inputXmlFileName, page => {
       println(s"processing pageId: ${page.pageId} ")
 
       if (lastSeenPageId.isEmpty || lastSeenPageId.exists(_.compare(page.pageId.trim) < 0)) {
-        infoboxFilter.foreach { infobox =>
+        infoBoxFilter.foreach { infoBoxName =>
 
-          if (page.infoBox.startsWith(s"{{Infobox $infobox") && nonEmptyInfobox(page, infobox)) {
-            println(s"found $infobox, going to save a page with id: ${page.pageId}")
-            writePage(infoBoxToDirName(infobox), page.pageId, page.infoBox)
+          if (page.infoBox.startsWith(s"$infoBoxPrefix $infoBoxName") && nonEmptyInfoBox(page, infoBoxName)) {
+            println(s"found $infoBoxName, going to save a page with id: ${page.pageId}")
+            writePage(infoBoxToDirName(infoBoxName), page.pageId, page.infoBox)
           }
         }
       }
     })
   }
 
-  private def parseXml(inputXmlFileName: String, callback: PageInfobox => Unit): Unit = {
+  private def parseXml(inputXmlFileName: String, callback: PageInfoBox => Unit): Unit = {
     val xml = new XMLEventReader(Source.fromFile(inputXmlFileName))
     var insidePage = false
     var buf = ArrayBuffer[String]()
@@ -72,7 +77,7 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
     }
   }
 
-  private def parsePageInfoBox(text: String): Option[PageInfobox] = {
+  private def parsePageInfoBox(text: String): Option[PageInfoBox] = {
     val maybeInfoBox = Option(new WikiPatternMatcher(text).getInfoBox).map(_.dumpRaw())
 
     maybeInfoBox.flatMap { infoBox =>
@@ -82,19 +87,19 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
         val parser = new WikiXMLParser(new ByteArrayInputStream(text.getBytes), new SetterArticleFilter(wrappedPage))
         parser.parse()
       } catch {
-        case e: Exception =>
+        case e: Exception => //ignore
       }
 
       val page = wrappedPage.page
-      lazy val pageId = {
-        val textElem = XML.loadString(text)
-        (textElem \ "id").head.child.head.toString
-      }
 
       if (page.getText != null && page.getTitle != null && page.getId != null
         && page.getRevisionId != null && page.getTimeStamp != null
         && !page.isCategory && !page.isTemplate) {
-        Some(PageInfobox(pageId, page.getTitle, infoBox))
+        val pageId = {
+          val textElem = XML.loadString(text)
+          (textElem \ "id").head.child.head.toString
+        }
+        Some(PageInfoBox(pageId, page.getTitle, infoBox))
       } else {
         None
       }
@@ -106,7 +111,7 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
     Files.createDirectories(path)
     val fullPath = path.resolve(pageId + ".txt").toAbsolutePath.toFile
 
-    println("writing to: " + fullPath)
+    println(s"writing to: $fullPath")
     val out = new FileOutputStream(fullPath)
 
     try {

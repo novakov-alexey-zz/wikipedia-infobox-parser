@@ -8,7 +8,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 object SparkReducer extends App {
-  val infoboxPropsMap = Map(
+  val infoBoxPropsMap = Map(
     "person" -> Person.properties,
     "settlement" -> Settlement.properties,
     "ort" -> Ort.properties,
@@ -19,34 +19,35 @@ object SparkReducer extends App {
   val inputLocation = new File(args(0))
   val outputLocation = new File(args(1))
 
-  val infoboxProps =
-    if (args.isDefinedAt(2) && infoboxPropsMap.isDefinedAt(args(2)))
-      infoboxPropsMap(args(2))
+  val infoBoxProps =
+    if (args.isDefinedAt(2) && infoBoxPropsMap.isDefinedAt(args(2)))
+      infoBoxPropsMap(args(2))
     else
-      throw new Exception(s"Invalid infobox name: ${args(2)}, available: ${infoboxPropsMap.keys}")
+      sys.error(s"Invalid infoBox name: ${args(2)}, available: ${infoBoxPropsMap.keys}")
 
   if (!inputLocation.isDirectory) {
-    throw new Exception("Input must be a directory: " + inputLocation.getAbsolutePath)
+    sys.error("Input must be a directory: " + inputLocation.getAbsolutePath)
   }
 
   // Start Spark
-  val conf = new SparkConf().setAppName("WikiInfoboxReducer").setMaster("local[*]")
+  val conf = new SparkConf().setAppName("WikiInfoBoxReducer").setMaster("local[*]")
   val sc = new SparkContext(conf)
 
   val files = FileSystem.get(sc.hadoopConfiguration).listStatus(new Path(inputLocation.toString))
   Files.createDirectories(outputLocation.toPath)
 
   val sizeOfParallelChunk = 8
+  val minimumPropertiesCount = 1
 
   // Process files
   val groupedFiles = files.grouped(sizeOfParallelChunk).toSeq
   groupedFiles.par.foreach(chunk => chunk.foreach { f =>
     val csv = sc.wholeTextFiles(f.getPath.toString)
-      .map { case (path, content) => path -> InfoboxPropertiesParser.parse(content) }
-      .map { case (path, parsedProps) =>
-        if (parsedProps.size > 1) {
-          val pageId = path.split("/").last.split("\\.").head
-          val values = (infoboxProps ++ parsedProps.filterKeys(k => infoboxProps.contains(k)) + (Infoboxes.pathKey -> pageId)).values
+      .map { case (path, content) =>
+        val parsedProps = InfoBoxPropertiesParser.parse(content)
+        if (parsedProps.size > minimumPropertiesCount) {
+          val pageId = InfoBoxes.pathKey -> path.split("/").last.split("\\.").head
+          val values = (infoBoxProps ++ parsedProps.filterKeys(k => infoBoxProps.contains(k)) + pageId).values
           Some(values.mkString(","))
         } else None
       }

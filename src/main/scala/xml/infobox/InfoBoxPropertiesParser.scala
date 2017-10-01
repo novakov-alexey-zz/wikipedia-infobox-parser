@@ -1,11 +1,11 @@
 package xml.infobox
 
-object InfoboxPropertiesParser {
+object InfoBoxPropertiesParser {
   val commentPrefix = "!--"
 
   /**
     *
-    * @param text the Infobox body itself
+    * @param text the InfoBox body itself
     * @return Map of names and their values
     */
   def parse(text: String): Map[String, String] = {
