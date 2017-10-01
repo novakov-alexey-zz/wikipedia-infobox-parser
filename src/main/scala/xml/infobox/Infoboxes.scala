@@ -2,26 +2,35 @@ package xml.infobox
 
 import java.nio.file.Paths
 
-import scala.collection.mutable
+import xml.infobox.Infoboxes._
+
 import scala.io.Source
 
 object Infoboxes {
   val pathKey = "path"
+
+  //skip comments, header, footer
+  def skipNoise(s: String): Boolean = s.startsWith("<!--") || s.startsWith("{{") || s.startsWith("}}")
+
+  // take only keys in lower case
+  def extractPropertyKey(s: String): Option[String] = {
+    s.split("=").headOption.map(_.trim.dropWhile(c => c == ' ' || c == '|').toLowerCase)
+  }
 }
 
 trait Infoboxes {
   def getKeys(fileName: String): Seq[String] = {
     Infoboxes.pathKey +:
     Source.fromFile(Paths.get("config", fileName).toFile).getLines()
-      .filterNot(l => l.startsWith("<!--") || l.startsWith("{{") || l.startsWith("}}")) //skip comments, header, footer
-      .map(_.split("=").headOption.map(_.trim.dropWhile(c => c == ' ' || c == '|').toLowerCase)) // take only keys in lower case
+      .filterNot(skipNoise)
+      .map(extractPropertyKey)
       .flatten
       .to[Seq]
   }
 
   val keys: Seq[String]
 
-  def properties: mutable.LinkedHashMap[String, String] = mutable.LinkedHashMap(keys.map(e => e -> ""): _*)
+  def properties: Map[String, String] = keys.map(e => e -> "").toMap
 }
 
 object Settlement extends Infoboxes {

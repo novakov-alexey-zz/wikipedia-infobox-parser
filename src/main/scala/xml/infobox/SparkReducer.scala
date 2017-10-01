@@ -25,11 +25,8 @@ object SparkReducer extends App {
     else
       throw new Exception(s"Invalid infobox name: ${args(2)}, available: ${infoboxPropsMap.keys}")
 
-  val inputDirPrefix = if (args.isDefinedAt(3)) Some(args(3).trim) else None
-
   if (!inputLocation.isDirectory) {
-    val msg = "Input must be a directory: " + inputLocation.getAbsolutePath
-    throw new Exception(msg)
+    throw new Exception("Input must be a directory: " + inputLocation.getAbsolutePath)
   }
 
   // Start Spark
@@ -42,7 +39,8 @@ object SparkReducer extends App {
   val sizeOfParallelChunk = 8
 
   // Process files
-  files.grouped(sizeOfParallelChunk).toSeq.par.foreach(chunk => chunk.foreach { f =>
+  val groupedFiles = files.grouped(sizeOfParallelChunk).toSeq
+  groupedFiles.par.foreach(chunk => chunk.foreach { f =>
     val csv = sc.wholeTextFiles(f.getPath.toString)
       .map { case (path, content) => path -> InfoboxPropertiesParser.parse(content) }
       .map { case (path, parsedProps) =>
@@ -51,11 +49,13 @@ object SparkReducer extends App {
           val values = (infoboxProps ++ parsedProps.filterKeys(k => infoboxProps.contains(k)) + (Infoboxes.pathKey -> pageId)).values
           Some(values.mkString(","))
         } else None
-      }.collect()
+      }
+      .collect()
+      .flatten
 
-    require(csv.length == 1, s"File ${f.getPath.toString} should have exactly one Infobox, but was ${csv.length}")
+    require(csv.length == 1, s"File ${f.getPath.toString} should have one Infobox")
 
-    csv.head.foreach { content =>
+    csv.foreach { content =>
       val writer = new FileWriter(s"$outputLocation/${f.getPath.getName}")
       writer.write(content)
       writer.close()

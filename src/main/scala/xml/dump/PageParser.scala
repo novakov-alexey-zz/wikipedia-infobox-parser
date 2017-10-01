@@ -37,11 +37,11 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
     })
   }
 
-  private def parseXml(inputXmlFileName: String, callback: PageInfobox => Unit) = {
+  private def parseXml(inputXmlFileName: String, callback: PageInfobox => Unit): Unit = {
     val xml = new XMLEventReader(Source.fromFile(inputXmlFileName))
-
     var insidePage = false
     var buf = ArrayBuffer[String]()
+
     for (event <- xml) {
       event match {
         case EvElemStart(_, "page", _, _) =>
@@ -53,7 +53,7 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
           buf += tag
           insidePage = false
 
-          parsePageInfobox(buf.mkString).foreach(callback)
+          parsePageInfoBox(buf.mkString).foreach(callback)
           buf.clear
         case e@EvElemStart(_, tag, _, _) =>
           if (insidePage) {
@@ -72,11 +72,10 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
     }
   }
 
-  private def parsePageInfobox(text: String): Option[PageInfobox] = {
-    val infoBox = Option(new WikiPatternMatcher(text).getInfoBox).map(_.dumpRaw())
+  private def parsePageInfoBox(text: String): Option[PageInfobox] = {
+    val maybeInfoBox = Option(new WikiPatternMatcher(text).getInfoBox).map(_.dumpRaw())
 
-    if (infoBox.isEmpty) None
-    else {
+    maybeInfoBox.flatMap { infoBox =>
       val wrappedPage = new WrappedPage
       //The parser occasionally throws exceptions out, we ignore these
       try {
@@ -94,16 +93,16 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
 
       if (page.getText != null && page.getTitle != null && page.getId != null
         && page.getRevisionId != null && page.getTimeStamp != null
-        && !page.isCategory && !page.isTemplate && infoBox.isDefined) {
-        Some(PageInfobox(pageId, page.getTitle, infoBox.get))
+        && !page.isCategory && !page.isTemplate) {
+        Some(PageInfobox(pageId, page.getTitle, infoBox))
       } else {
         None
       }
     }
   }
 
-  private def writePage(infoboxName: String, pageId: String, text: String) = {
-    val path = Paths.get(outputLocation.toString, infoboxName)
+  private def writePage(infoBoxName: String, pageId: String, text: String): Unit = {
+    val path = Paths.get(outputLocation.toString, infoBoxName)
     Files.createDirectories(path)
     val fullPath = path.resolve(pageId + ".txt").toAbsolutePath.toFile
 

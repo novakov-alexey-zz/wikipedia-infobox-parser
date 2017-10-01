@@ -16,6 +16,6 @@ class SetterArticleFilter(val wrappedPage: WrappedPage) extends IArticleFilter {
   *
   * @param page The WikiArticle that is being wrapped
   */
-case class WrappedPage(var page: WikiArticle = new WikiArticle) {}
+case class WrappedPage(var page: WikiArticle = new WikiArticle)
 
 case class PageInfobox(pageId: String, title: String, infoBox: String)
