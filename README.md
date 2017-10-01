@@ -1,6 +1,6 @@
 # wikipedia-infobox-parser
 
-It consists of two parts:
+Consists of multiple parts:
 
 1. Extracts specified Infobox definitions from the XML dump file and saves them as separate files for any further processing.
 2. Converts Infobox text files to corresponding CSV files.
