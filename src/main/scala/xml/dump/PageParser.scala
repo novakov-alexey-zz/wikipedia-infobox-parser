@@ -15,12 +15,16 @@ import scala.xml.pull.{EvElemEnd, EvElemStart, EvText, XMLEventReader}
 object PageParser {
   val infoBoxPrefix = "{{Infobox"
 
-  def apply(outputLocation: File, outDirPrefix: String) = new PageParser(outputLocation, outDirPrefix)
+  def apply(outputLocation: File, outDirPrefix: String) =
+    new PageParser(outputLocation, outDirPrefix)
 }
 
 class PageParser(outputLocation: File, outDirPrefix: String) {
 
-  def parseInfoBoxToCsv(inputXmlFileName: String, infoBoxFilter: Set[String], lastSeenPageId: Option[String] = None): Unit = {
+  def parseInfoBoxToCsv(
+                         inputXmlFileName: String,
+                         infoBoxFilter: Set[String],
+                         lastSeenPageId: Option[String] = None): Unit = {
 
     def nonEmptyInfoBox(page: PageInfoBox, infoBox: String) =
       page.infoBox.trim != s"$infoBoxPrefix $infoBox}}"
@@ -33,7 +37,8 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
       if (lastSeenPageId.isEmpty || lastSeenPageId.exists(_.compare(page.pageId.trim) < 0)) {
         infoBoxFilter.foreach { infoBoxName =>
 
-          if (page.infoBox.startsWith(s"$infoBoxPrefix $infoBoxName") && nonEmptyInfoBox(page, infoBoxName)) {
+          if (page.infoBox.startsWith(s"$infoBoxPrefix $infoBoxName")
+            && nonEmptyInfoBox(page, infoBoxName)) {
             println(s"found $infoBoxName, going to save a page with id: ${page.pageId}")
             writePage(infoBoxToDirName(infoBoxName), page.pageId, page.infoBox)
           }
@@ -84,7 +89,9 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
       val wrappedPage = new WrappedPage
       //The parser occasionally throws exceptions out, we ignore these
       try {
-        val parser = new WikiXMLParser(new ByteArrayInputStream(text.getBytes), new SetterArticleFilter(wrappedPage))
+        val parser = new WikiXMLParser(
+          new ByteArrayInputStream(text.getBytes),
+          new SetterArticleFilter(wrappedPage))
         parser.parse()
       } catch {
         case e: Exception => //ignore
@@ -117,7 +124,8 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
     try {
       out.write(text.getBytes())
     } catch {
-      case NonFatal(throwable) => sys.error(s"error '${throwable.getMessage}' while saving page $fullPath")
+      case NonFatal(throwable) =>
+        sys.error(s"error '${throwable.getMessage}' while saving page $fullPath")
     } finally out.close()
   }
 }

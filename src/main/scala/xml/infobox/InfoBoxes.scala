@@ -10,12 +10,12 @@ object InfoBoxes {
   val pathKey = "path"
 
   //skip comments, header, footer
-  def skipNoise(s: String): Boolean = s.startsWith("<!--") || s.startsWith("{{") || s.startsWith("}}")
+  def skipNoise(s: String): Boolean =
+    s.startsWith("<!--") || s.startsWith("{{") || s.startsWith("}}")
 
   // take only keys in lower case
-  def extractPropertyKey(s: String): Option[String] = {
+  def extractPropertyKey(s: String): Option[String] =
     s.split("=").headOption.map(_.trim.dropWhile(c => c == ' ' || c == '|').toLowerCase)
-  }
 }
 
 trait InfoBoxes {
@@ -25,7 +25,7 @@ trait InfoBoxes {
       .filterNot(skipNoise)
       .map(extractPropertyKey)
       .flatten
-      .to[Seq]
+      .to[Seq[String]]
   }
 
   val keys: Seq[String]
