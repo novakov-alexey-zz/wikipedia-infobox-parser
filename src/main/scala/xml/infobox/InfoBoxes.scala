@@ -25,7 +25,7 @@ trait InfoBoxes {
       .filterNot(skipNoise)
       .map(extractPropertyKey)
       .flatten
-      .to[Seq[String]]
+      .to[Seq]
   }
 
   val keys: Seq[String]

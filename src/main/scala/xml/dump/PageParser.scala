@@ -40,7 +40,7 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
           if (page.infoBox.startsWith(s"$infoBoxPrefix $infoBoxName")
             && nonEmptyInfoBox(page, infoBoxName)) {
             println(s"found $infoBoxName, going to save a page with id: ${page.pageId}")
-            writePage(infoBoxToDirName(infoBoxName), page.pageId, page.infoBox)
+            writeInfoBox(infoBoxToDirName(infoBoxName), page.pageId, page.infoBox)
           }
         }
       }
@@ -113,7 +113,7 @@ class PageParser(outputLocation: File, outDirPrefix: String) {
     }
   }
 
-  private def writePage(infoBoxName: String, pageId: String, text: String): Unit = {
+  private def writeInfoBox(infoBoxName: String, pageId: String, text: String): Unit = {
     val path = Paths.get(outputLocation.toString, infoBoxName)
     Files.createDirectories(path)
     val fullPath = path.resolve(pageId + ".txt").toAbsolutePath.toFile
