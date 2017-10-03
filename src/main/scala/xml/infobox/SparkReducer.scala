@@ -34,7 +34,6 @@ object SparkReducer extends App {
 
   Files.createDirectories(outputLocation.toPath)
 
-  val sizeOfParallelChunk = 8
   val minimumPropertiesCount = 1
 
   // Process files
